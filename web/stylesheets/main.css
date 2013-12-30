@@ -1,0 +1,137 @@
+
+/* ------------- Overrides ------------------ */
+
+pre code {
+    background: none repeat scroll 0 0 #F5F5F5;
+}
+.listingblock .title {
+    color: #666;
+    font-weight: bold;
+}
+
+.syn-main-panel h1 a,
+.syn-main-panel h2 a,
+.syn-main-panel h3 a,
+.syn-main-panel h4 a,
+.syn-main-panel h5 a {
+    color: #666;
+}
+.syn-main-panel h1 a:hover,
+.syn-main-panel h2 a:hover,
+.syn-main-panel h3 a:hover,
+.syn-main-panel h4 a:hover,
+.syn-main-panel h5 a:hover {
+    color: #222;
+    text-decoration: none;
+}
+
+/* -------------- My own styles -------------- */
+
+body {
+    background-color: #f9f9f9;
+    color: #666;
+    overflow-y: scroll;
+}
+
+.syn-about-panel {
+    position: relative;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background-color: #222;
+    color: #999;
+    padding: 30px;
+}
+.syn-main-panel {
+    width: 100%;
+    float: none;
+    padding: 30px;
+}
+
+@media (min-width: 768px) {
+    .syn-about-panel {
+        position: fixed;
+        width: 30%;
+    }
+    .syn-main-panel {
+        float: right;
+        width: 70%;
+        overflow: hidden;
+    }
+}
+
+.syn-about-panel h3 {
+    color: #999;
+}
+.syn-author-img-w {
+    width: 100%;
+    text-align: center;
+    padding-bottom: 30px;
+}
+.syn-author-img img {
+    max-width: 180px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+    border: 3px solid #999;
+}
+.syn-author-img img:hover {
+    border: 3px solid #ccc;
+}
+.syn-user-tumb {
+    font-size: 12em;
+    color: #999;
+}
+
+.syn-author-info {
+    text-align: center;
+    padding-bottom: 30px;
+}
+
+.syn-social {
+    width: 100%;
+    text-align: center;
+    padding-bottom: 30px;
+}
+.syn-social a {
+    color: #999;
+    font-size: 50px;
+    padding-right: 15px;
+}
+.syn-social a:hover {
+    color: #ccc;
+}
+
+.syn-about-me {
+    text-align: center;
+}
+
+.syn-blog-item {
+    padding: 10px 30px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    position: relative;
+}
+.syn-blog-item-date {
+    white-space: nowrap;
+    font-size: 40%;
+}
+
+.syn-share-btns {
+}
+
+.syn-blog-item-details {
+    padding: 20px 0;
+    font-size: 16px;
+    line-height: 22px;
+}
+
+.syn-post-header-w {
+    padding: 0 0 30px 0;
+}
+
