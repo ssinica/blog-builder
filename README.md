@@ -19,6 +19,7 @@ Features
 * Sidebar with info about the author;
 * index.html page with list of posts;
 * Post page;
+* Code highlighting;
 * "Follow me on Twitter" button;
 * Share post in Twitter and G+;
 * Google Analytics integration.
