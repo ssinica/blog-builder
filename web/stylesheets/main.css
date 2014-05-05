@@ -25,12 +25,34 @@ pre code {
     text-decoration: none;
 }
 
+.syn-main-panel img {
+    max-width: 100%;
+    height: auto;
+    line-height: 1;
+    }
+
 /* -------------- My own styles -------------- */
 
 body {
     background-color: #f9f9f9;
     color: #666;
     overflow-y: scroll;
+    font-size: 20px;
+    line-height: 1.5;
+    font-weight: 400;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.sectionbody {
+    margin: 20px 0 0 0;
+}
+.paragraph,
+.imageblock {
+    margin: 10px 0 20px 0;
+}
+.imageblock .title {
+    text-align: center;
+    font-size: 14px;
 }
 
 .syn-about-panel {
