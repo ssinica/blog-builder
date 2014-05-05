@@ -4,7 +4,10 @@ Static blog generator
 Short intro
 -----------
 
-This is yet another tool to build static blogs. The basic idea - you write your posts in ```asciidoc``` format and blog-builder generates from these posts a bunch of ```html/css/js``` files. The generated code can be uploaded to any web server and you get a [beautiful blog](http://blog.sinica.me) without a pain. 
+This is yet another tool to build static blogs. The basic idea - you write your posts in ```asciidoc```
+format (see [Asciidoctor Writers Guide](http://asciidoctor.org/docs/asciidoc-writers-guide/)) and blog-builder generates from these posts a bunch of ```html/css/js``` files.
+
+The generated code can be uploaded to any web server and you get a [beautiful blog](http://blog.sinica.me) without a pain.
 
 Prerequisites
 -------------
@@ -30,7 +33,6 @@ Roadmap
 * RSS;
 * Command line interface;
 * Distribution as ZIP archive;
-* Use images in posts.
 
 How to generate
 ---------------
@@ -39,7 +41,7 @@ The tool is available only as source code, and there is no a friendly interface 
 
 * Clone the repository: ```git clone git@github.com:ssinica/blog-builder.git```;
 * Build the project: ```mvn clean install```;
-* Create somethere (dropbox is a goog choise) a directory which will contain the posts in asciidoc format;
+* Create somethere (dropbox is a good choise) a directory which will contain the posts in asciidoc format;
 * Copy somethere example properties file ```blog-builder.properties``` and edit with correct values;
 * Write a post;
 * Generate a blog (this step should be performed after any change in ```blog-builder.properties``` or in post) by starting builder ```com.synitex.blogbuilder.BlogBuilder```. As a propgram argument pass the path to ```blog-builder.properties``` file. If you are lucky then the blog will be generated in directory you have specified in ```blog-builder.properties``` file.
