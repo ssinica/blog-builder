@@ -57,6 +57,8 @@ public class BlogBuilder {
 
         // copy resources to output directory
         copyStaticFiles(props);
+
+        copySourceDirs(props);
     }
 
     private void prepareOutDirectory(Path outPath) {
@@ -98,6 +100,26 @@ public class BlogBuilder {
             FileUtils.copyDirectory(resourcesPath.toFile(), outPath.toFile());
         } catch (IOException e) {
             throw new RuntimeException("Failed to copy resources to out directory", e);
+        }
+    }
+
+    private void copySourceDirs(IBlogProperties props) {
+        File outPath = Paths.get(props.getOutPath()).toFile();
+        Path postsPath = Paths.get(props.getPostsPath());
+
+        Filter<Path> dirsOnlyFilter = new Filter<Path>() {
+            @Override
+            public boolean accept(Path entry) throws IOException {
+                return entry.toFile().isDirectory();
+            }
+        };
+
+        try(DirectoryStream<Path> ds = Files.newDirectoryStream(postsPath, dirsOnlyFilter)) {
+            for(Path path : ds) {
+                FileUtils.copyDirectoryToDirectory(path.toFile(), outPath);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to clean up output directory", e);
         }
     }
 
