@@ -1,14 +1,14 @@
 package com.synitex.blogbuilder.io;
 
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import com.google.template.soy.data.SoyMapData;
 import com.synitex.blogbuilder.dto.PostDto;
+import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import com.synitex.blogbuilder.soy.IDto2SoyMapper;
 import com.synitex.blogbuilder.soy.ITemplatesProvider;
 import com.synitex.blogbuilder.soy.TemplateId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.nio.file.Path;
@@ -16,21 +16,13 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @Singleton
-public class PostWriter extends AbstractWriter implements IPostWriter {
-
-    private static final Logger log = LoggerFactory.getLogger(PostWriter.class);
-
-    private final IBlogProperties props;
-    private final ITemplatesProvider templatesProvider;
-    private final IDto2SoyMapper soyMapper;
+public class PostWriter extends AbstractPageWriter implements IPostWriter {
 
     @Inject
     public PostWriter(IBlogProperties props,
                       ITemplatesProvider templatesProvider,
                       IDto2SoyMapper soyMapper) {
-        this.props = props;
-        this.templatesProvider = templatesProvider;
-        this.soyMapper = soyMapper;
+        super(props, templatesProvider, soyMapper);
     }
 
     @Override
@@ -40,6 +32,9 @@ public class PostWriter extends AbstractWriter implements IPostWriter {
 
         SoyMapData data = new SoyMapData();
         data.putSingle("post", soyMapper.map(post));
+
+        List<TagDto> tags = collectTags(ImmutableList.of(post));
+        data.putSingle("tags", soyMapper.mapList(tags));
 
         String postHtml = templatesProvider.build(TemplateId.POST, data);
 

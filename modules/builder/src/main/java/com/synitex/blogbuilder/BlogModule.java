@@ -5,8 +5,10 @@ import com.synitex.blogbuilder.asciidoc.AsciidocService;
 import com.synitex.blogbuilder.asciidoc.IAsciidocService;
 import com.synitex.blogbuilder.io.IIndexWriter;
 import com.synitex.blogbuilder.io.IPostWriter;
+import com.synitex.blogbuilder.io.ITagsPageWriter;
 import com.synitex.blogbuilder.io.IndexWriter;
 import com.synitex.blogbuilder.io.PostWriter;
+import com.synitex.blogbuilder.io.TagsPageWriter;
 import com.synitex.blogbuilder.props.BlogProperties;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import com.synitex.blogbuilder.soy.Dto2SoyMapper;
@@ -36,6 +38,7 @@ public class BlogModule extends AbstractModule {
         bind(IPostWriter.class).to(PostWriter.class);
         bind(IIndexWriter.class).to(IndexWriter.class);
         bind(IDto2SoyMapper.class).to(Dto2SoyMapper.class);
+        bind(ITagsPageWriter.class).to(TagsPageWriter.class);
     }
 
 }

@@ -39,12 +39,11 @@ public class Dto2SoyMapper implements IDto2SoyMapper {
     }
 
     @Override
-    public <T extends Object> SoyListData mapList(List<T> objects) {
+    public <T> SoyListData mapList(List<T> objects) {
         return buildSoyList(objects, new Function<T, SoyMapData>() {
             @Override
             public SoyMapData apply(T value) {
-                SoyMapData mapData = mapImpl(value);
-                return mapData;
+                return mapImpl(value);
             }
         });
     }

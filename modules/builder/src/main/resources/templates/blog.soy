@@ -8,7 +8,24 @@
 */
 {template .indexHtml}
     {call common.header data="all" /}
-        {call blog.sidebar data="all" /}
+        {call .sidebar data="all" /}
+        <div class="syn-main-panel">
+            {foreach $post in $data.posts}
+                {call blog.postItem data="all"}
+                    {param post: $post /}
+                {/call}
+            {/foreach}
+        </div>
+    {call common.footer data="all" /}
+{/template}
+
+/**
+* index.html page.
+* @param data
+*/
+{template .postTagsHtml}
+    {call common.header data="all" /}
+        {call .sidebar data="all" /}
         <div class="syn-main-panel">
             {foreach $post in $data.posts}
                 {call blog.postItem data="all"}
@@ -32,14 +49,15 @@
 
                 <div class="syn-post-header-w">
                     <h1 class="syn-post-header"><a href="/{$data.post.permlink}.html">{$data.post.title}</a> <small class="syn-blog-item-date">{$data.post.date}</small></h1>
-                    {call blog.shareBtns data="all"}
-                        {param post: $data.post /}
-                    {/call}
                 </div>
 
                 <div class="syn-post">
                     {$data.post.content |noAutoescape}
                 </div>
+
+                {call .tags}
+                    {param tags: $data.tags /}
+                {/call}
 
                 {call blog.shareBtns data="all"}
                     {param post: $data.post /}
@@ -54,12 +72,20 @@
 /**
 * Sidebar
 * @param ctx
+* @param data
 */
 {template .sidebar}
     <div class="syn-about-panel">
         {call blog.about}
             {param author: $ctx.author /}
         {/call}
+        {if isNonnull($data.tags)}
+            <div class="syn-tags-container">
+                {foreach $tag in $data.tags}
+                    <a href="{$tag.file}" class="label syn-label-default">{$tag.text} <span class="badge">{$tag.count}</span></a>
+                {/foreach}
+            </div>
+        {/if}
     </div>
 {/template}
 
@@ -70,6 +96,10 @@
 {template .postItem}
     <div class="syn-blog-item">
         <h1><a href="/{$post.permlink}.html">{$post.title}</a> <small class="syn-blog-item-date">{$post.date}</small></h1>
+
+        {call .tags}
+            {param tags: $post.tags /}
+        {/call}
 
         {if isNonnull($post.intro)}
             <div class="syn-blog-item-details">
@@ -139,4 +169,18 @@
         </div>
     {/if}
 
+{/template}
+
+/**
+* Tags
+* @param tags
+*/
+{template .tags}
+    {if isNonnull($tags)}
+        <div class="syn-blog-item-tags">
+            {foreach $tag in $tags}
+                <a href="{$tag.file}" class="label syn-label-default">{$tag.text}</a>
+            {/foreach}
+        </div>
+    {/if}
 {/template}

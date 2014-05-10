@@ -1,9 +1,14 @@
 package com.synitex.blogbuilder.asciidoc;
 
+import com.google.common.base.Function;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
 import com.google.inject.Singleton;
+import com.synitex.blogbuilder.AbstractService;
 import com.synitex.blogbuilder.dto.PostDto;
+import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.Asciidoctor.Factory;
@@ -30,7 +35,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Singleton
-public class AsciidocService implements IAsciidocService {
+public class AsciidocService extends AbstractService implements IAsciidocService {
 
     private static final Logger log = LoggerFactory.getLogger(AsciidocService.class);
 
@@ -38,7 +43,8 @@ public class AsciidocService implements IAsciidocService {
     private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
 
     @Inject
-    public AsciidocService(IBlogProperties props) {
+    public AsciidocService(
+            IBlogProperties props) {
         this.props = props;
     }
 
@@ -87,6 +93,23 @@ public class AsciidocService implements IAsciidocService {
 
         Assert.notNull(dto.getDate(), AsciidocConstants.DATE + " is required param in post");
         Assert.notNull(dto.getPermlink(), AsciidocConstants.PERMALINK + " is required param in post");
+
+        String tagsSource = (String) header.getAttributes().get(AsciidocConstants.TAGS);
+        if(!Strings.isNullOrEmpty(tagsSource)) {
+            List<String> tagSources = Lists.newArrayList(
+                    Splitter.on(",")
+                            .omitEmptyStrings()
+                            .trimResults()
+                            .split(tagsSource)
+            );
+            List<TagDto> tags = Lists.newArrayList(Lists.transform(tagSources, new Function<String, TagDto>() {
+                @Override
+                public TagDto apply(String input) {
+                    return new TagDto(input, tagToFileName(input), -1);
+                }
+            }));
+            dto.setTags(tags);
+        }
 
         return dto;
     }
