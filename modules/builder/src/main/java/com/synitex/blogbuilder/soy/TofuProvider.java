@@ -39,28 +39,32 @@ public class TofuProvider extends AbstractTofuProvider implements ITofuProvider 
     }
 
     private synchronized void reloadTofu() {
-        log.info("Reloading tofu...");
+        log.debug("Reloading tofu...");
         Stopwatch stopwatch = Stopwatch.createStarted();
+
+        String templatesPath = props.getTemplatesPath();
+        log.debug("Dev Mode: " + props.isDevMode());
 
         List<SoyFile> soyFiles = null;
         try {
-            soyFiles = listSoyFilesFromDirectory(props.getTemplatesPath());
+            soyFiles = props.isDevMode() ? listSoyFilesFromDirectory(templatesPath) : listSoyFilesFromClasspath();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to get soy templates from " + props.getTemplatesPath(), e);
+            log.error("Failed to list soy templates", e);
+            throw new RuntimeException("Failed to list soy templates", e);
         }
         SoyFileSet sfs = collectAllSoyTemplates(soyFiles);
         SoyTofu tf = sfs.compileToTofu();
         setTofu(tf);
 
-        log.info("Tofu reloaded in " + stopwatch.elapsed(MILLISECONDS) + "ms");
+        log.debug("Tofu reloaded in " + stopwatch.elapsed(MILLISECONDS) + "ms");
     }
 
     private SoyFileSet collectAllSoyTemplates(List<SoyFile> soyFiles) {
         SoyFileSet.Builder soyBuilder = new SoyFileSet.Builder();
         for (SoyFile soyFile : soyFiles) {
-            soyBuilder.add(soyFile.file);
+            soyBuilder.add(soyFile.url);
             if(log.isDebugEnabled()) {
-                log.debug("Soy file found and added to tofu: " + soyFile.file.getAbsolutePath());
+                log.debug("Soy file found and added to tofu: " + soyFile.url.toString());
             }
         }
         return soyBuilder.build();

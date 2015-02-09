@@ -6,10 +6,6 @@ public interface IBlogProperties {
 
     String getOutPath();
 
-    String getTemplatesPath();
-
-    String getStaticResourcesPath();
-
     BlogAuthorProperties getAuthorProperties();
 
     String getBlogRootUrl();
@@ -17,5 +13,11 @@ public interface IBlogProperties {
     String getGaTrackingId();
 
     String getGaDomainName();
+
+    boolean isDevMode();
+
+    String getTemplatesPath();
+
+    String getWebPath();
 
 }

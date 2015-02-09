@@ -15,9 +15,12 @@ import com.synitex.blogbuilder.props.IBlogProperties;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
@@ -34,15 +37,14 @@ public class BlogBuilder {
     private Injector injector;
 
     public static void main(String[] args) {
-        new BlogBuilder().start(args[0]);
+        new BlogBuilder(args[0]).start();
     }
 
-    public BlogBuilder() {
-
+    public BlogBuilder(String blogPropertiesPath) {
+        injector = Guice.createInjector(new BlogModule(blogPropertiesPath));
     }
 
-    public void start(String bbPropsPath) {
-        injector = Guice.createInjector(new BlogModule(bbPropsPath));
+    public void start() {
 
         IBlogProperties props = injector.getInstance(IBlogProperties.class);
         IAsciidocService ascService = injector.getInstance(IAsciidocService.class);
@@ -111,10 +113,12 @@ public class BlogBuilder {
                     }
                 }
             } catch (IOException e) {
+                log.error("Failed to clean up output directory", e);
                 throw new RuntimeException("Failed to clean up output directory", e);
             }
         } else {
             try {Files.createDirectories(outPath);} catch (IOException e) {
+                log.error("Failed to create output directory", e);
                 throw new RuntimeException("Failed to create output directory", e);
             }
         }
@@ -131,14 +135,39 @@ public class BlogBuilder {
     }
 
     private void copyStaticFiles(IBlogProperties props) {
-        Path outPath = Paths.get(props.getOutPath());
-        Path resourcesPath = Paths.get(props.getStaticResourcesPath());
-
         try {
-            FileUtils.copyDirectory(resourcesPath.toFile(), outPath.toFile());
+
+            Path assetsPath = Paths.get(props.getOutPath(), "assets");
+            if(!assetsPath.toFile().exists()) {
+                Files.createDirectory(assetsPath);
+            }
+
+            if(props.isDevMode()){
+
+                Path resourcesPath = Paths.get(props.getWebPath());
+                FileUtils.copyDirectory(resourcesPath.toFile(), assetsPath.toFile());
+
+            } else {
+
+                String pattern = "classpath:assets/**.*";
+                PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+                Resource[] resources = resolver.getResources(pattern);
+                if (resources != null && resources.length > 0) {
+                    for (Resource r : resources) {
+                        String fileName = r.getFilename();
+                        try (InputStream in = r.getURL().openStream()) {
+                            Files.copy(in, Paths.get(assetsPath.toString(), fileName));
+                        }
+                    }
+                }
+
+            }
+
         } catch (IOException e) {
+            log.error("Failed to copy assets to out directory", e);
             throw new RuntimeException("Failed to copy resources to out directory", e);
         }
+
     }
 
     private void copySourceDirs(IBlogProperties props) {
@@ -157,7 +186,8 @@ public class BlogBuilder {
                 FileUtils.copyDirectoryToDirectory(path.toFile(), outPath);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to clean up output directory", e);
+            log.error("Failed to copy source dir", e);
+            throw new RuntimeException("Failed to copy surce dir", e);
         }
     }
 

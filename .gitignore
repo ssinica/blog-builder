@@ -3,4 +3,5 @@
 target
 bin
 out
+.vagrant
 

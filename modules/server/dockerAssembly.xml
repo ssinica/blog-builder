@@ -1,0 +1,9 @@
+<assembly>
+    <files>
+        <file>
+            <source>target/server-1.0-SNAPSHOT.jar</source>
+            <outputDirectory>.</outputDirectory>
+            <destName>server.jar</destName>
+        </file>
+    </files>
+</assembly>

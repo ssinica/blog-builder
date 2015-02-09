@@ -2,10 +2,13 @@ package com.synitex.blogbuilder.soy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,8 +16,22 @@ public abstract class AbstractTofuProvider {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractTofuProvider.class);
 
+    protected List<SoyFile> listSoyFilesFromClasspath() throws IOException {
+        List<SoyFile> soyFiles = new ArrayList<SoyFile>();
+        String pattern = "classpath:templates/**.soy";
+        log.debug("Searching soy files in classpath using pattern: " + pattern);
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] resources = resolver.getResources(pattern);
+        if (resources != null && resources.length > 0) {
+            for (Resource r : resources) {
+                soyFiles.add(new SoyFile(r.getURL()));
+            }
+        }
+        return soyFiles;
+    }
+
     protected List<SoyFile> listSoyFilesFromDirectory(String soyPath) throws IOException {
-        log.info("Searching soy files in directory: " + soyPath);
+        log.debug("Searching soy files in directory: " + soyPath);
         File path = new File(soyPath);
         List<SoyFile> soyFiles = new ArrayList<SoyFile>();
         listSoyFilesFromDirectoryImpl(path, soyFiles);
@@ -30,7 +47,7 @@ public abstract class AbstractTofuProvider {
         });
         if(files != null && files.length > 0) {
             for(File file : files) {
-                soyFiles.add(new SoyFile(file));
+                soyFiles.add(new SoyFile(file.toURI().toURL()));
             }
         }
         File[] dirs = path.listFiles(new FileFilter() {
@@ -47,9 +64,9 @@ public abstract class AbstractTofuProvider {
     // --------------------------------------------------------
 
     public class SoyFile {
-        protected File file;
-        public SoyFile(File file) {
-            this.file = file;
+        protected URL url;
+        public SoyFile(URL url) {
+            this.url = url;
         }
     }
 }

@@ -21,12 +21,10 @@ import com.synitex.blogbuilder.soy.TofuProvider;
 
 public class BlogModule extends AbstractModule {
 
-    private final String bbPropsPath;
     private final BlogProperties props;
 
-    public BlogModule(String bbPropsPath) {
-        this.bbPropsPath = bbPropsPath;
-        props = new BlogProperties(bbPropsPath);
+    public BlogModule(String blogPropertiesPath) {
+        props = new BlogProperties(blogPropertiesPath);
     }
 
     @Override

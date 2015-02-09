@@ -5,19 +5,19 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 public class BlogProperties implements IBlogProperties {
 
     private String postsPath;
     private String outPath;
-    private String templatesPath;
-    private String resourcesPath;
     private BlogAuthorProperties authorProperties;
     private String blogRootUrl;
     private String gaTrackingId;
     private String gaDomainId;
+    private boolean devMode = false;
+    private String templatesPath;
+    private String webPath;
 
     public BlogProperties(String bbPropsFilePath) {
         loadProperties(bbPropsFilePath);
@@ -27,10 +27,6 @@ public class BlogProperties implements IBlogProperties {
         Properties props = new Properties();
         try(FileInputStream fis = new FileInputStream(new File(bbPropsFilePath))) {
             props.load(fis);
-
-            String rootPath = props.getProperty("blog-builder.root.path");
-            templatesPath = Paths.get(rootPath, "modules", "builder", "src", "main", "resources", "templates").toString();
-            resourcesPath = Paths.get(rootPath, "web").toString();
 
             postsPath = props.getProperty("blog.posts.path");
             outPath = props.getProperty("blog.out.path");
@@ -47,6 +43,10 @@ public class BlogProperties implements IBlogProperties {
             gaTrackingId = props.getProperty("blog.ga.tracking.id", null);
             gaDomainId = props.getProperty("blog.ga.domain", null);
 
+            devMode = Boolean.parseBoolean(props.getProperty("blog.dev.mode", "false"));
+            templatesPath = props.getProperty("blog.dev.templates.path", "");
+            webPath = props.getProperty("blog.dev.web.path", "");
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to read blog-builder properties file from " + bbPropsFilePath);
         }
@@ -60,16 +60,6 @@ public class BlogProperties implements IBlogProperties {
     @Override
     public String getOutPath() {
         return outPath;
-    }
-
-    @Override
-    public String getTemplatesPath() {
-        return templatesPath;
-    }
-
-    @Override
-    public String getStaticResourcesPath() {
-        return resourcesPath;
     }
 
     @Override
@@ -90,6 +80,21 @@ public class BlogProperties implements IBlogProperties {
     @Override
     public String getGaDomainName() {
         return Strings.emptyToNull(gaDomainId);
+    }
+
+    @Override
+    public boolean isDevMode() {
+        return devMode;
+    }
+
+    @Override
+    public String getTemplatesPath() {
+        return templatesPath;
+    }
+
+    @Override
+    public String getWebPath() {
+        return webPath;
     }
 
 }
