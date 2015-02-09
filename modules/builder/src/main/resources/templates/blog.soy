@@ -101,12 +101,6 @@
             {param tags: $post.tags /}
         {/call}
 
-        {if isNonnull($post.intro)}
-            <div class="syn-blog-item-details">
-                {$post.intro |noAutoescape}
-            </div>
-        {/if}
-
         {call blog.shareBtns data="all"}
             {param post: $post /}
         {/call}

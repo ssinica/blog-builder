@@ -29,7 +29,6 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -43,14 +42,13 @@ public class AsciidocService extends AbstractService implements IAsciidocService
     private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
 
     @Inject
-    public AsciidocService(
-            IBlogProperties props) {
+    public AsciidocService(IBlogProperties props) {
         this.props = props;
     }
 
     @Override
     public List<PostDto> listPosts() {
-        List<PostDto> posts = new ArrayList<>();
+        List<PostDto> posts = Lists.newArrayList();
 
         Path postsPath = Paths.get(props.getPostsPath());
 
@@ -89,7 +87,6 @@ public class AsciidocService extends AbstractService implements IAsciidocService
         dto.setPermlink((String) header.getAttributes().get(AsciidocConstants.PERMALINK));
         dto.setTitle(header.getDocumentTitle());
         dto.setDate((String) header.getAttributes().get(AsciidocConstants.DATE));
-        dto.setIntro((String) header.getAttributes().get(AsciidocConstants.INTRO));
 
         Assert.notNull(dto.getDate(), AsciidocConstants.DATE + " is required param in post");
         Assert.notNull(dto.getPermlink(), AsciidocConstants.PERMALINK + " is required param in post");

@@ -1,7 +1,5 @@
 package com.synitex.blogbuilder.dto;
 
-import com.google.common.base.Strings;
-
 import java.util.List;
 
 public class PostDto {
@@ -10,7 +8,6 @@ public class PostDto {
     private String content;
     private String permlink;
     private String date;
-    private String intro;
     private List<TagDto> tags;
 
     public String getTitle() {
@@ -43,14 +40,6 @@ public class PostDto {
 
     public void setDate(String date) {
         this.date = date;
-    }
-
-    public void setIntro(String intro) {
-        this.intro = Strings.emptyToNull(intro);
-    }
-
-    public String getIntro() {
-        return intro;
     }
 
     public List<TagDto> getTags() {
