@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface ITagsPageWriter {
 
-    void write(TagDto tag, List<PostDto> posts);
+    void write(TagDto tag, List<PostDto> posts, List<TagDto> tags);
 
 }

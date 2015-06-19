@@ -9,6 +9,7 @@ public class PostDto {
     private String permlink;
     private String date;
     private List<TagDto> tags;
+    private String timeSincePrevPost;
 
     public String getTitle() {
         return title;
@@ -48,5 +49,13 @@ public class PostDto {
 
     public void setTags(List<TagDto> tags) {
         this.tags = tags;
+    }
+
+    public String getTimeSincePrevPost() {
+        return timeSincePrevPost;
+    }
+
+    public void setTimeSincePrevPost(String timeSincePrevPost) {
+        this.timeSincePrevPost = timeSincePrevPost;
     }
 }

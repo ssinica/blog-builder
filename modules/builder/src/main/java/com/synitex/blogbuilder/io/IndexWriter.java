@@ -3,6 +3,7 @@ package com.synitex.blogbuilder.io;
 import com.google.inject.Singleton;
 import com.google.template.soy.data.SoyMapData;
 import com.synitex.blogbuilder.dto.PostDto;
+import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import com.synitex.blogbuilder.soy.IDto2SoyMapper;
 import com.synitex.blogbuilder.soy.ITemplatesProvider;
@@ -24,10 +25,10 @@ public class IndexWriter extends AbstractPageWriter implements IIndexWriter {
     }
 
     @Override
-    public void write(List<PostDto> posts) {
+    public void write(List<PostDto> posts, List<TagDto> tags) {
         SoyMapData data = new SoyMapData();
         Path path = Paths.get(props.getOutPath(),  "index.html");
-        write(posts, TemplateId.INDEX_HTML, path, data);
+        write(posts, tags, TemplateId.INDEX_HTML, path, data);
     }
 
 }

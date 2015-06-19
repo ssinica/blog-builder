@@ -56,7 +56,7 @@
                 </div>
 
                 {call .tags}
-                    {param tags: $data.tags /}
+                    {param tags: $data.post.tags /}
                 {/call}
 
                 {call blog.shareBtns data="all"}
@@ -97,6 +97,10 @@
     <div class="syn-blog-item">
         <h1><a href="/{$post.permlink}.html">{$post.title}</a> <small class="syn-blog-item-date">{$post.date}</small></h1>
 
+        <div class="syn-post">
+            {$post.content |noAutoescape}
+        </div>
+
         {call .tags}
             {param tags: $post.tags /}
         {/call}
@@ -104,8 +108,14 @@
         {call blog.shareBtns data="all"}
             {param post: $post /}
         {/call}
-
     </div>
+
+    {if isNonnull($post.timeSincePrevPost)}
+        <div class="syn-blog-item-delim">
+            <span>{$post.timeSincePrevPost}</span>
+        </div>
+    {/if}
+
 {/template}
 
 /**
@@ -138,8 +148,7 @@
 
     <div class="syn-author-info">
         {if isNonnull($author.name)}
-            <h3>Hi! My name is {$author.name}</h3>
-            <h4>And this is my blog</h4>
+            <h3>Hi and welcome to my blog!</h3>
         {else}
             <h3>This is anonymous blog</h3>
         {/if}

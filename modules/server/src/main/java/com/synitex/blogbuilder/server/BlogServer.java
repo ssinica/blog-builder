@@ -10,9 +10,14 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class BlogServer {
 
     private static final Logger log = LoggerFactory.getLogger(BlogServer.class);
+    private final BlogBuilder builder;
 
     //private final BlogBuilder builder;
 
@@ -46,12 +51,12 @@ public class BlogServer {
             httpServer.start();
             log.info("Blog server is started on port " + port);
 
-            /*builder = new BlogBuilder(blogPropertiesPath);
+            builder = new BlogBuilder(blogPropertiesPath);
             ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
             pool.scheduleAtFixedRate(new BuildJob(builder),
                     TimeUnit.SECONDS.toMillis(5),
                     TimeUnit.SECONDS.toMillis(15),
-                    TimeUnit.MILLISECONDS);*/
+                    TimeUnit.MILLISECONDS);
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to start blog server", e);

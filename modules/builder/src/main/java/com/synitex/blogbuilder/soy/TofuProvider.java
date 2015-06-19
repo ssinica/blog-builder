@@ -31,6 +31,7 @@ public class TofuProvider extends AbstractTofuProvider implements ITofuProvider 
 
     @Override
     public SoyTofu getTofu() {
+        reloadTofu();
         return tofu;
     }
 

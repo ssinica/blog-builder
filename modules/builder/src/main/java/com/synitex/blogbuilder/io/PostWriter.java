@@ -1,6 +1,5 @@
 package com.synitex.blogbuilder.io;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Singleton;
 import com.google.template.soy.data.SoyMapData;
 import com.synitex.blogbuilder.dto.PostDto;
@@ -26,14 +25,12 @@ public class PostWriter extends AbstractPageWriter implements IPostWriter {
     }
 
     @Override
-    public void write(PostDto post) {
+    public void write(PostDto post, List<TagDto> tags) {
         String permalink = post.getPermlink();
         String outPath = props.getOutPath();
 
         SoyMapData data = new SoyMapData();
         data.putSingle("post", soyMapper.map(post));
-
-        List<TagDto> tags = collectTags(ImmutableList.of(post));
         data.putSingle("tags", soyMapper.mapList(tags));
 
         String postHtml = templatesProvider.build(TemplateId.POST, data);
@@ -43,9 +40,9 @@ public class PostWriter extends AbstractPageWriter implements IPostWriter {
     }
 
     @Override
-    public void write(List<PostDto> posts) {
+    public void write(List<PostDto> posts, List<TagDto> tags) {
         for(PostDto post : posts) {
-            write(post);
+            write(post, tags);
         }
     }
 

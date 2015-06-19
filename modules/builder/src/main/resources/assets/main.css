@@ -144,6 +144,15 @@ body {
     font-size: 40%;
 }
 
+.syn-blog-item-delim {
+    width: 100%;
+    text-align: center;
+}
+.syn-blog-item-delim span {
+    padding: 10px 0 20px 0;
+    display: inline-block;
+}
+
 .syn-share-btns {
 }
 
@@ -159,7 +168,7 @@ body {
 
 
 .syn-label-default {
-    background-color: #777;
+    background-color: #999;
     }
 .syn-blog-item-tags {
     font-size: 14px;
@@ -178,12 +187,12 @@ body {
     text-align: center;
     }
 .syn-tags-container .label {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: normal;
     margin: 0 10px 10px 0;
     display: inline-block;
     }
 .syn-tags-container .label .badge {
-    color: #fff;
-    background-color: #5cb85c;
+    color: #999;
+    background-color: #444;
     }

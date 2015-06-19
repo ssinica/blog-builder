@@ -1,6 +1,7 @@
 package com.synitex.blogbuilder;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -13,10 +14,15 @@ import com.synitex.blogbuilder.io.IPostWriter;
 import com.synitex.blogbuilder.io.ITagsPageWriter;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,13 +32,15 @@ import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 public class BlogBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(BlogBuilder.class);
+    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
 
     private Injector injector;
 
@@ -58,19 +66,20 @@ public class BlogBuilder {
 
         // find all posts
         List<PostDto> posts = ascService.listPosts();
+        List<TagDto> tags = collectTags(posts);
+        injectAdditionalData(posts);
 
         // write posts to html files
-        postWriter.write(posts);
+        postWriter.write(posts, tags);
 
         // write index.html
-        indexWriter.write(posts);
+        indexWriter.write(posts, tags);
 
         // write tags htmls
-        Set<TagDto> tags = collectTags(posts);
         for(TagDto tag : tags) {
             List<PostDto> filteredPosts = filterPostsByTag(tag, posts);
             if(!Iterables.isEmpty(filteredPosts)) {
-                tagsWriter.write(tag, filteredPosts);
+                tagsWriter.write(tag, filteredPosts, tags);
             }
         }
 
@@ -80,7 +89,22 @@ public class BlogBuilder {
         copySourceDirs(props);
     }
 
-    private List<PostDto> filterPostsByTag(final TagDto tag, List<PostDto> posts) {
+    private void injectAdditionalData(List<PostDto> posts) {
+        if(CollectionUtils.isEmpty(posts)) {
+            return;
+        }
+        DateTime dtPostPrev = dtf.parseDateTime(posts.get(0).getDate());
+        for(int i = 0; i < posts.size(); i++) {
+            if(i > 0) {
+                DateTime dtPostCur = dtf.parseDateTime(posts.get(i).getDate());
+                long days = Duration.millis(dtPostPrev.getMillis() - dtPostCur.getMillis()).getStandardDays();
+                posts.get(i - 1).setTimeSincePrevPost(days == 1 ? "1 day" : String.format("%s days", days));
+                dtPostPrev = dtPostCur;
+            }
+        }
+    }
+
+    private List<PostDto> filterPostsByTag(final TagDto tag, List<PostDto > posts) {
         return Lists.newArrayList(Iterables.filter(posts, new Predicate<PostDto>() {
             @Override
             public boolean apply(PostDto input) {
@@ -88,17 +112,6 @@ public class BlogBuilder {
                 return !Iterables.isEmpty(tags) && tags.contains(tag);
             }
         }));
-    }
-
-    private Set<TagDto> collectTags(List<PostDto> posts) {
-        Set<TagDto> tags = new HashSet<>();
-        for(PostDto post : posts) {
-            List<TagDto> values = post.getTags();
-            if(!Iterables.isEmpty(values)) {
-                tags.addAll(values);
-            }
-        }
-        return tags;
     }
 
     private void prepareOutDirectory(Path outPath) {
@@ -142,12 +155,12 @@ public class BlogBuilder {
                 Files.createDirectory(assetsPath);
             }
 
-            if(props.isDevMode()){
+            //if(props.isDevMode()){
 
-                Path resourcesPath = Paths.get(props.getWebPath());
-                FileUtils.copyDirectory(resourcesPath.toFile(), assetsPath.toFile());
+            //    Path resourcesPath = Paths.get(props.getWebPath());
+            //    FileUtils.copyDirectory(resourcesPath.toFile(), assetsPath.toFile());
 
-            } else {
+            //} else {
 
                 String pattern = "classpath:assets/**.*";
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -161,7 +174,7 @@ public class BlogBuilder {
                     }
                 }
 
-            }
+            //}
 
         } catch (IOException e) {
             log.error("Failed to copy assets to out directory", e);
@@ -189,6 +202,39 @@ public class BlogBuilder {
             log.error("Failed to copy source dir", e);
             throw new RuntimeException("Failed to copy surce dir", e);
         }
+    }
+
+    private List<TagDto> collectTags(List<PostDto> posts) {
+        List<TagDto> tags = new ArrayList<>();
+
+        HashMultiset<TagDto> mset = HashMultiset.create();
+        for(PostDto post : posts) {
+            List<TagDto> values = post.getTags();
+            if(!Iterables.isEmpty(values)) {
+                mset.addAll(values);
+            }
+        }
+
+        for(TagDto tag : mset.elementSet()) {
+            tags.add(new TagDto(tag.getText(), tag.getFile(), mset.count(tag)));
+        }
+
+        Collections.sort(tags, new Comparator<TagDto>() {
+            @Override
+            public int compare(TagDto o1, TagDto o2) {
+                int c1 = o1.getCount();
+                int c2 = o2.getCount();
+                if (c1 == c2) {
+                    return 0;
+                } else if (c1 > c2) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        });
+
+        return tags;
     }
 
 

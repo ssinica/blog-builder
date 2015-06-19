@@ -25,10 +25,10 @@ public class TagsPageWriter extends AbstractPageWriter implements ITagsPageWrite
     }
 
     @Override
-    public void write(TagDto tag, List<PostDto> posts) {
+    public void write(TagDto tag, List<PostDto> posts, List<TagDto> tags) {
         SoyMapData data = new SoyMapData();
         Path path = Paths.get(props.getOutPath(), tag.getFile());
-        write(posts, TemplateId.POST_TAGS_HTML, path, data);
+        write(posts, tags, TemplateId.POST_TAGS_HTML, path, data);
     }
 
 }
