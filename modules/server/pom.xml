@@ -143,22 +143,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.jolokia</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <configuration>
-                    <images>
-                        <image>
-                            <name>ssinica/blog-builder:latest</name>
-                            <build>
-                                <from>ssinica/blog-builder:base</from>
-                                <exportDir>/app/lib</exportDir>
-                                <assemblyDescriptor>dockerAssembly.xml</assemblyDescriptor>
-                            </build>
-                        </image>
-                    </images>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
