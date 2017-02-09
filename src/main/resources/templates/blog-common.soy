@@ -1,0 +1,63 @@
+{namespace blog.common}
+
+/**
+* Header.
+* @param ctx
+* @param data
+*/
+{template .header}
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8">
+			<meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+			{if isNonnull($data) and isNonnull($data.post)}
+				<title>Blog | {$data.post.title}</title>
+			{else}
+				{if isNonnull($ctx.author.name)}
+					<title>Blog | {$ctx.author.name}</title>
+				{else}
+					<title>Blog | Noname</title>
+				{/if}
+			{/if}
+
+			<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+			<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+			<link rel="stylesheet" href="http://yandex.st/highlightjs/7.5/styles/default.min.css">
+			<link href="/assets/main.css" rel="stylesheet">
+			<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700&subset=latin,cyrillic' rel='stylesheet' type='text/css'>
+
+		</head>
+		<body>
+{/template}
+
+/**
+* Footer.
+* @param ctx
+*/
+{template .footer}
+
+			<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+			<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+			<script src="http://yandex.st/highlightjs/7.5/highlight.min.js"></script>
+
+			{if isNonnull($ctx.author.addThisId)}
+				<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=${$ctx.author.addThisId}"></script>
+			{/if}
+
+			<script>hljs.initHighlightingOnLoad();</script>
+
+			{if isNonnull($ctx.gaTrackingId) and isNonnull($ctx.gaDomain)}
+				<script>
+					{literal}var Blog = {};{/literal}
+					Blog.GA_TRACKING_ID = '{$ctx.gaTrackingId}';
+					Blog.GA_DOMAIN = '{$ctx.gaDomain}';
+				</script>
+			{/if}
+
+			<script src="/assets/main.js"></script>
+
+		</body>
+	</html>
+{/template}
