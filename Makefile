@@ -1,5 +1,5 @@
 REGISTRY = ssinica
-IMAGE_NAME = blog
+IMAGE_NAME = blog-builder
 VERSION = dev
 
 build:
