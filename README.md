@@ -42,6 +42,25 @@ To re-generate blog visit: http://localhost:8888/rebuild.
 
 To see your blog visit: http://localhost:8888.
 
+Configuration
+-------------
+
+Example of ``blog.properties`` file:
+
+```
+blog.root.url=http://blog.sinica.me
+
+blog.ga.tracking.id=
+blog.ga.domain=
+
+author.name=Sergey Sinica
+author.image=https://pbs.twimg.com/profile_images/3762256738/195f3ac721125b7d63e4bfeea53be9d2.jpeg
+author.twitter=ssinica
+author.github=ssinica
+author.google=+SergeySinica
+```
+
+
 How to publish
 --------------
 
