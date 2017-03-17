@@ -1,6 +1,7 @@
 package com.synitex.blogbuilder.io;
 
 import com.google.template.soy.data.SoyMapData;
+import com.google.template.soy.tofu.SoyTofu;
 import com.synitex.blogbuilder.dto.PostDto;
 import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
@@ -25,7 +26,18 @@ public class PostWriter extends AbstractPageWriter implements IPostWriter {
     }
 
     @Override
-    public void write(PostDto post, List<TagDto> tags) {
+    public void write(PostDto post, List<TagDto> tags, SoyTofu tofu) {
+        writeImpl(post, tags, tofu);
+    }
+
+    @Override
+    public void write(List<PostDto> posts, List<TagDto> tags, SoyTofu tofu) {
+        for(PostDto post : posts) {
+            writeImpl(post, tags, tofu);
+        }
+    }
+
+    private void writeImpl(PostDto post, List<TagDto> tags, SoyTofu tofu) {
         String permalink = post.getPermlink();
         String outPath = props.getOutPath();
 
@@ -33,17 +45,10 @@ public class PostWriter extends AbstractPageWriter implements IPostWriter {
         data.putSingle("post", soyMapper.map(post));
         data.putSingle("tags", soyMapper.mapList(tags));
 
-        String postHtml = templatesProvider.build(TemplateId.POST, data);
+        String postHtml = templatesProvider.build(TemplateId.POST, data, tofu);
 
         Path path = Paths.get(outPath, permalink + ".html");
         writeFile(path, postHtml);
-    }
-
-    @Override
-    public void write(List<PostDto> posts, List<TagDto> tags) {
-        for(PostDto post : posts) {
-            write(post, tags);
-        }
     }
 
 }

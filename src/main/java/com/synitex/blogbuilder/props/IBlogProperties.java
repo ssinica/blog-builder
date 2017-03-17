@@ -14,4 +14,6 @@ public interface IBlogProperties {
 
     String getGaDomainName();
 
+    IDevProperties getDevProperties();
+
 }

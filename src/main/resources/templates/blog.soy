@@ -8,31 +8,18 @@
 */
 {template .indexHtml}
     {call common.header data="all" /}
-        {call .sidebar data="all" /}
-        <div class="syn-main-panel">
-            {foreach $post in $data.posts}
-                {call blog.postItem data="all"}
-                    {param post: $post /}
-                {/call}
-            {/foreach}
-        </div>
-    {call common.footer data="all" /}
-{/template}
-
-/**
-* index.html page.
-* @param data
-*/
-{template .postTagsHtml}
-    {call common.header data="all" /}
-        {call .sidebar data="all" /}
-        <div class="syn-main-panel">
-            {foreach $post in $data.posts}
-                {call blog.postItem data="all"}
-                    {param post: $post /}
-                {/call}
-            {/foreach}
-        </div>
+	<div class="fluid-container">
+		{call .topbar data="all" /}
+		<div class="row">
+			<div class="col-md-offset-1 col-md-10 syn-posts-w">
+				{foreach $post in $data.posts}
+					{call blog.postShortItem data="all"}
+						{param post: $post /}
+					{/call}
+				{/foreach}
+			</div>
+		</div>
+	</div>
     {call common.footer data="all" /}
 {/template}
 
@@ -42,50 +29,83 @@
 */
 {template .post}
     {call common.header data="all" /}
-        {call blog.sidebar data="all" /}
-        <div class="syn-main-panel">
+    	<div class="fluid-container">
+        	{call blog.topbar data="all" /}
+			<div class="row syn-main-panel">
+				<div class="col-md-offset-1 col-md-10 syn-blog-item">
 
-            <div class="syn-blog-item">
+					<div class="syn-post-header-w">
+						<h1 class="syn-post-header"><a href="/{$data.post.permlink}.html">{$data.post.title}</a> <small class="syn-blog-item-date">{$data.post.date}</small></h1>
+					</div>
 
-                <div class="syn-post-header-w">
-                    <h1 class="syn-post-header"><a href="/{$data.post.permlink}.html">{$data.post.title}</a> <small class="syn-blog-item-date">{$data.post.date}</small></h1>
-                </div>
+					{call .tags}
+						{param tags: $data.post.tags /}
+					{/call}
 
-                <div class="syn-post">
-                    {$data.post.content |noAutoescape}
-                </div>
+					{call blog.shareBtns data="all"}
+						{param post: $data.post /}
+					{/call}
 
-                {call .tags}
-                    {param tags: $data.post.tags /}
-                {/call}
+					<div class="syn-post">
+						{$data.post.content |noAutoescape}
+					</div>
 
-                {call blog.shareBtns data="all"}
-                    {param post: $data.post /}
-                {/call}
-
-            </div>
-
-        </div>
+				</div>
+			</div>
+		</div>
     {call common.footer data="all" /}
 {/template}
 
 /**
-* Sidebar
+* Topbar
 * @param ctx
-* @param data
 */
-{template .sidebar}
-    <div class="syn-about-panel">
-        {call blog.about}
-            {param author: $ctx.author /}
-        {/call}
-        {if isNonnull($data.tags)}
-            <div class="syn-tags-container">
-                {foreach $tag in $data.tags}
-                    <a href="{$tag.file}" class="label syn-label-default">{$tag.text} <span class="badge">{$tag.count}</span></a>
-                {/foreach}
-            </div>
-        {/if}
+{template .topbar}
+	<div class="row syn-header">
+		<div class="col-md-offset-1 col-md-1 syn-author-info">
+			<div class="syn-author-img-w">
+				<a href="/" class="syn-author-img">
+					{if isNonnull($ctx.author.image)}
+						<img src="{$ctx.author.image}"></img>
+					{else}
+						<span class="syn-user-tumb"><i class="fa fa-user"></i></span>
+					{/if}
+				</a>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<h3>Hi and welcome!</h3>
+		</div>
+		<div class="col-md-4">
+			<div class="syn-about-me">
+				{if isNonnull($ctx.author.twitter)}
+					<a href="https://twitter.com/{$ctx.author.twitter}" class="twitter-follow-button" data-show-count="true" data-lang="en">Follow @ssinica</a>
+				{/if}
+				{if isNonnull($ctx.author.twitter)}
+					<a href="https://twitter.com/{$ctx.author.twitter}" class="syn-social-a" target="_blank"><i class="fa fa-twitter-square"></i></a>
+				{/if}
+				{if isNonnull($ctx.author.github)}
+					<a href="https://github.com/{$ctx.author.github}" class="syn-social-a" target="_blank"><i class="fa fa-github-square"></i></a>
+				{/if}
+				{if isNonnull($ctx.author.google)}
+					<a href="https://plus.google.com/{$ctx.author.google}" class="syn-social-a" target="_blank"><i class="fa fa-google-plus-square"></i></a>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/template}
+
+/**
+* Post short item
+* @param post
+*/
+{template .postShortItem}
+    <div class="syn-blog-short-item">
+		<a href="/{$post.permlink}.html">{$post.title}</a>
+		<small class="syn-blog-item-date">{$post.date}</small>
+		{call .tags}
+			{param tags: $post.tags /}
+		{/call}
     </div>
 {/template}
 
@@ -131,50 +151,6 @@
 {/template}
 
 /**
-* Panel about me.
-* @param author
-*/
-{template .about}
-
-    <div class="syn-author-img-w">
-        <a href="/" class="syn-author-img">
-            {if isNonnull($author.image)}
-                <img src="{$author.image}"></img>
-            {else}
-                <span class="syn-user-tumb"><i class="fa fa-user"></i></span>
-            {/if}
-        </a>
-    </div>
-
-    <div class="syn-author-info">
-        {if isNonnull($author.name)}
-            <h3>Hi and welcome to my blog!</h3>
-        {else}
-            <h3>This is anonymous blog</h3>
-        {/if}
-    </div>
-
-    <div class="syn-social">
-        {if isNonnull($author.twitter)}
-            <a href="https://twitter.com/{$author.twitter}" target="_blank"><i class="fa fa-twitter-square"></i></a>
-        {/if}
-        {if isNonnull($author.github)}
-            <a href="https://github.com/{$author.github}" target="_blank"><i class="fa fa-github-square"></i></a>
-        {/if}
-        {if isNonnull($author.google)}
-            <a href="https://plus.google.com/{$author.google}" target="_blank"><i class="fa fa-google-plus-square"></i></a>
-        {/if}
-    </div>
-
-    {if isNonnull($author.twitter)}
-        <div class="syn-about-me">
-            <a href="https://twitter.com/{$author.twitter}" class="twitter-follow-button" data-show-count="true" data-lang="en">Follow @ssinica</a>
-        </div>
-    {/if}
-
-{/template}
-
-/**
 * Tags
 * @param tags
 */
@@ -182,7 +158,7 @@
     {if isNonnull($tags)}
         <div class="syn-blog-item-tags">
             {foreach $tag in $tags}
-                <a href="{$tag.file}" class="label syn-label-default">{$tag.text}</a>
+                <span class="label syn-label-default">{$tag.text}</span>
             {/foreach}
         </div>
     {/if}

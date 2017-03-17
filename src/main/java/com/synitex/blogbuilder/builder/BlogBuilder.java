@@ -1,29 +1,24 @@
-package com.synitex.blogbuilder;
+package com.synitex.blogbuilder.builder;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.template.soy.tofu.SoyTofu;
 import com.synitex.blogbuilder.asciidoc.IAsciidocService;
 import com.synitex.blogbuilder.dto.PostDto;
 import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.io.IIndexWriter;
 import com.synitex.blogbuilder.io.IPostWriter;
-import com.synitex.blogbuilder.io.ITagsPageWriter;
 import com.synitex.blogbuilder.props.IBlogProperties;
+import com.synitex.blogbuilder.soy.ITofuProvider;
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,86 +32,76 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 @Service
 public class BlogBuilder implements IBlogBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(BlogBuilder.class);
-    private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
 
     private final IBlogProperties props;
     private final IAsciidocService ascService;
     private final IPostWriter postWriter;
     private final IIndexWriter indexWriter;
-    private final ITagsPageWriter tagsWriter;
+    private final ITofuProvider tofuProvider;
 
     @Autowired
     public BlogBuilder(IBlogProperties props,
                        IAsciidocService ascService,
                        IPostWriter postWriter,
-                       IIndexWriter indexWriter, ITagsPageWriter tagsWriter) {
+                       IIndexWriter indexWriter,
+                       ITofuProvider tofuProvider) {
         this.props = props;
         this.ascService = ascService;
         this.postWriter = postWriter;
         this.indexWriter = indexWriter;
-        this.tagsWriter = tagsWriter;
+        this.tofuProvider = tofuProvider;
     }
 
-
-    @Override
-    public void build() {
-        
-        // prepare output directory
+    @PostConstruct
+    public void init() {
         Path outPath = Paths.get(props.getOutPath());
+        log.info("Prepare out dir: {}", outPath);
         prepareOutDirectory(outPath);
 
-        // find all posts
-        List<PostDto> posts = ascService.listPosts();
-        List<TagDto> tags = collectTags(posts);
-        injectAdditionalData(posts);
+        log.info("Copy assets...");
+        copyAssetsFiles(props);
 
-        // write posts to html files
-        postWriter.write(posts, tags);
-
-        // write index.html
-        indexWriter.write(posts, tags);
-
-        // write tags htmls
-        for(TagDto tag : tags) {
-            List<PostDto> filteredPosts = filterPostsByTag(tag, posts);
-            if(!Iterables.isEmpty(filteredPosts)) {
-                tagsWriter.write(tag, filteredPosts, tags);
-            }
-        }
-
-        // copy resources to output directory
-        copyStaticFiles(props);
-
+        log.info("Copy static files...");
         copySourceDirs(props);
     }
 
-    private void injectAdditionalData(List<PostDto> posts) {
-        if(CollectionUtils.isEmpty(posts)) {
-            return;
-        }
-        DateTime dtPostPrev = dtf.parseDateTime(posts.get(0).getDate());
-        for(int i = 0; i < posts.size(); i++) {
-            if(i > 0) {
-                DateTime dtPostCur = dtf.parseDateTime(posts.get(i).getDate());
-                long days = Duration.millis(dtPostPrev.getMillis() - dtPostCur.getMillis()).getStandardDays();
-                posts.get(i - 1).setTimeSincePrevPost(days == 1 ? "1 day" : String.format("%s days", days));
-                dtPostPrev = dtPostCur;
-            }
-        }
+    @Override
+    public void build() {
+        SoyTofu tofu = tofuProvider.getTofu();
+        List<TagDto> tags = Collections.emptyList();
+        List<PostDto> posts = ascService.listPosts();
+        
+        log.info("Converting posts to HTML...");
+        postWriter.write(posts, tags, tofu);
+        
+        log.info("Writing index.html...");
+        indexWriter.write(posts, tags, tofu);
     }
 
-    private List<PostDto> filterPostsByTag(final TagDto tag, List<PostDto > posts) {
-        return Lists.newArrayList(Iterables.filter(posts, new Predicate<PostDto>() {
-            @Override
-            public boolean apply(PostDto input) {
-                List<TagDto> tags = input.getTags();
-                return !Iterables.isEmpty(tags) && tags.contains(tag);
-            }
-        }));
+    @Override
+    public void build(final String postName) {
+        List<TagDto> tags = Collections.emptyList();
+        List<PostDto> posts = ascService.listPosts();
+        SoyTofu tofu = tofuProvider.getTofu();
+        
+        PostDto post = ascService.getPost(postName);
+        if(post != null) {
+            log.info("Writing post {} to HTML...", post.getPermlink());
+            postWriter.write(post, tags, tofu);
+        }
+        
+        log.info("Writing index.html...");
+        indexWriter.write(posts, tags, tofu);
+
+        if(props.getDevProperties().isDevMode()) {
+            copyAssetsFiles(props);
+        }
     }
 
     private void prepareOutDirectory(Path outPath) {
@@ -152,7 +137,7 @@ public class BlogBuilder implements IBlogBuilder {
         };
     }
 
-    private void copyStaticFiles(IBlogProperties props) {
+    private void copyAssetsFiles(IBlogProperties props) {
         try {
 
             Path assetsPath = Paths.get(props.getOutPath(), "assets");
@@ -160,12 +145,13 @@ public class BlogBuilder implements IBlogBuilder {
                 Files.createDirectory(assetsPath);
             }
 
-            //if(props.isDevMode()){
+            if(props.getDevProperties().isDevMode()) {
+                
+                Path resourcesPath = Paths.get(props.getDevProperties().getAssetsPath());
+                log.info("Copy {} to {}.", resourcesPath, assetsPath);
+                FileUtils.copyDirectory(resourcesPath.toFile(), assetsPath.toFile());
 
-            //    Path resourcesPath = Paths.get(props.getWebPath());
-            //    FileUtils.copyDirectory(resourcesPath.toFile(), assetsPath.toFile());
-
-            //} else {
+            } else {
 
                 String pattern = "classpath:assets/**.*";
                 PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -173,13 +159,15 @@ public class BlogBuilder implements IBlogBuilder {
                 if (resources != null && resources.length > 0) {
                     for (Resource r : resources) {
                         String fileName = r.getFilename();
-                        try (InputStream in = r.getURL().openStream()) {
-                            Files.copy(in, Paths.get(assetsPath.toString(), fileName));
+                        try (InputStream from = r.getURL().openStream()) {
+                            Path to = Paths.get(assetsPath.toString(), fileName);
+                            log.info("Copy {} to {}.", fileName, to);
+                            Files.copy(from, to, REPLACE_EXISTING);
                         }
                     }
                 }
 
-            //}
+            }
 
         } catch (IOException e) {
             log.error("Failed to copy assets to out directory", e);
@@ -221,7 +209,7 @@ public class BlogBuilder implements IBlogBuilder {
         }
 
         for(TagDto tag : mset.elementSet()) {
-            tags.add(new TagDto(tag.getText(), tag.getFile(), mset.count(tag)));
+            tags.add(new TagDto(tag.getText(), mset.count(tag)));
         }
 
         Collections.sort(tags, new Comparator<TagDto>() {
@@ -241,6 +229,5 @@ public class BlogBuilder implements IBlogBuilder {
 
         return tags;
     }
-
-
+    
 }

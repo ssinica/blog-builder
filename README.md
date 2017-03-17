@@ -4,6 +4,7 @@ Static blog generator
 Short intro
 -----------
 
+
 This is yet another tool to build static blogs. The basic idea - you write your posts in ```asciidoc```
 format (see [Asciidoctor Writers Guide](http://asciidoctor.org/docs/asciidoc-writers-guide/)) and blog-builder generates from these posts a bunch of ```html/css/js``` files.
 
@@ -11,6 +12,7 @@ The generated code can be uploaded to any web server and you get a [beautiful bl
 
 Features
 ----------
+
 
 * Information about author;
 * Code highlighting;
@@ -33,7 +35,9 @@ docker run -d --name=blog-builder \
 	ssinica/blog-builder
 ```
 
+
 You should mount 3 directories:
+
 * ``/source``, with files in asciidoc format and ``.asc`` extension.
 * ``/result``, where to put generated html.
 * ``/config``, with configuration file named ``blog.properties``
@@ -65,6 +69,7 @@ How to publish
 --------------
 
 Blog builder respects ```.git``` directory and ```CNAME``` file in result directory. These files will not be changed during blog re-generation. So the easiest way to publish your blog is to use [github pages](http://pages.github.com/).
+
 
 Post format
 -----------

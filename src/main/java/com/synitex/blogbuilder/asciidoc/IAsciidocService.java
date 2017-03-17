@@ -8,4 +8,6 @@ public interface IAsciidocService {
 
     List<PostDto> listPosts();
 
+    PostDto getPost(String name);
+
 }

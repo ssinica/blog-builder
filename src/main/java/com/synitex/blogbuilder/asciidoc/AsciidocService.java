@@ -5,6 +5,11 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.synitex.blogbuilder.dirwatch.DirWatchConfig;
+import com.synitex.blogbuilder.dirwatch.DirWatchListener;
+import com.synitex.blogbuilder.dirwatch.IDirWatchService;
 import com.synitex.blogbuilder.dto.PostDto;
 import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
@@ -23,61 +28,89 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 @Service
-public class AsciidocService implements IAsciidocService {
+public class AsciidocService implements IAsciidocService, DirWatchListener {
 
     private static final Logger log = LoggerFactory.getLogger(AsciidocService.class);
-
-    private final IBlogProperties props;
     private static final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd-MM-yyyy");
 
+    private final IBlogProperties props;
+    private final Asciidoctor ascDoc;
+    private final Map<String, PostDto> postsByName = Maps.newConcurrentMap();
+    private final Set<Path> pathsToUpdate = Sets.newConcurrentHashSet();
+    
     @Autowired
-    public AsciidocService(IBlogProperties props) {
+    public AsciidocService(IBlogProperties props,
+                           IDirWatchService dirWatchService) {
         this.props = props;
+        ascDoc = Factory.create();
+
+        parseAllPosts();
+
+        String postsPath = props.getPostsPath();
+        DirWatchConfig dirWatchConfig = new DirWatchConfig(postsPath, 3000, postsPredicate());
+        dirWatchService.registerListener(this, dirWatchConfig);
+
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(this::updatePostsIfRequired, 20, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void onPathUpdated(Path path) {
+        log.debug("Post updated: {}!", path);
+        pathsToUpdate.add(path);
+    }
+
+    @Override
+    public PostDto getPost(String name) {
+        return postsByName.get(name);
     }
 
     @Override
     public List<PostDto> listPosts() {
-        List<PostDto> posts = Lists.newArrayList();
-
-        Path postsPath = Paths.get(props.getPostsPath());
-
-        Asciidoctor ascDoc = Factory.create();
-        Options options = new Options();
-
-        try(DirectoryStream<Path> ds = Files.newDirectoryStream(postsPath, postsFilter())) {
-            for(Path postPath : ds) {
-                log.info("Gen post from source: {}", postPath.getFileName().toString());
-                String content = ascDoc.renderFile(postPath.toFile(), options);
-                DocumentHeader header = ascDoc.readDocumentHeader(postPath.toFile());
-                posts.add(createPostDto(header, content));
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load posts from " + postsPath, e);
-        }
-
-        Collections.sort(posts, getPostsComparator());
+        ArrayList<PostDto> posts = Lists.newArrayList(postsByName.values());
+        posts.sort(getPostsComparator());
         return posts;
     }
 
-    private Comparator<? super PostDto> getPostsComparator() {
-        return new Comparator<PostDto>() {
-            @Override
-            public int compare(PostDto o1, PostDto o2) {
-                DateTime dt1 = Strings.isNullOrEmpty(o1.getDate()) ? null : dtf.parseDateTime(o1.getDate());
-                DateTime dt2 = Strings.isNullOrEmpty(o2.getDate()) ? null : dtf.parseDateTime(o2.getDate());
-                return ComparisonChain.start().compare(dt2, dt1).result();
-            }
-        };
+    private void updatePostsIfRequired() {
+        if(pathsToUpdate.size() > 0) {
+            Set<Path> paths = new HashSet<>(pathsToUpdate);
+            pathsToUpdate.clear();
+            paths.forEach(this::parsePost);
+        }
+    }
+
+    private void parseAllPosts() {
+        Path postsPath = Paths.get(props.getPostsPath());
+        try {
+            Files.list(postsPath)
+                    .filter(postsPredicate())
+                    .forEach(this::parsePost);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    private void parsePost(Path postPath) {
+        log.info("Parsing post {}...", postPath);
+        Options options = new Options();
+        String content = ascDoc.renderFile(postPath.toFile(), options);
+        DocumentHeader header = ascDoc.readDocumentHeader(postPath.toFile());
+        PostDto post = createPostDto(header, content);
+        postsByName.put(post.getPermlink(), post);
     }
 
     private PostDto createPostDto(DocumentHeader header, String content) {
@@ -101,7 +134,7 @@ public class AsciidocService implements IAsciidocService {
             List<TagDto> tags = Lists.newArrayList(Lists.transform(tagSources, new Function<String, TagDto>() {
                 @Override
                 public TagDto apply(String input) {
-                    return new TagDto(input, tagToFileName(input), -1);
+                    return new TagDto(input, -1);
                 }
             }));
             dto.setTags(tags);
@@ -110,19 +143,19 @@ public class AsciidocService implements IAsciidocService {
         return dto;
     }
 
-    private Filter<Path> postsFilter() {
-        return new Filter<Path>() {
-            @Override
-            public boolean accept(Path entry) throws IOException {
-                File f = entry.toFile();
-                return f.isFile() && f.getName().endsWith(".asc");
-            }
+    private Predicate<Path> postsPredicate() {
+        return path -> {
+            File f = path.toFile();
+            return f.isFile() && f.getName().endsWith(".asc");
         };
     }
 
-    private String tagToFileName(String tag) {
-        String s = tag.replace(" ", "_");
-        return "tag_" + s + ".html";
+    private Comparator<? super PostDto> getPostsComparator() {
+        return (Comparator<PostDto>) (o1, o2) -> {
+            DateTime dt1 = Strings.isNullOrEmpty(o1.getDate()) ? null : dtf.parseDateTime(o1.getDate());
+            DateTime dt2 = Strings.isNullOrEmpty(o2.getDate()) ? null : dtf.parseDateTime(o2.getDate());
+            return ComparisonChain.start().compare(dt2, dt1).result();
+        };
     }
 
 }

@@ -1,14 +1,12 @@
 package com.synitex.blogbuilder.dto;
 
 public class TagDto {
-
-    private String file;
+    
     private String text;
     private int count = 1;
 
-    public TagDto(String text, String tagsFileName, int count) {
+    public TagDto(String text, int count) {
         this.text = text;
-        this.file = tagsFileName;
         this.count = count;
     }
 
@@ -26,14 +24,6 @@ public class TagDto {
 
     public void setCount(int count) {
         this.count = count;
-    }
-
-    public String getFile() {
-        return file;
-    }
-
-    public void setFile(String file) {
-        this.file = file;
     }
 
     @Override

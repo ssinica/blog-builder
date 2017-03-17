@@ -15,6 +15,7 @@ public class BlogProperties implements IBlogProperties {
     private static final Logger log = LoggerFactory.getLogger(BlogProperties.class);
 
     private final BlogAuthorProperties blogAuthorProperties;
+    private final IDevProperties devProperties;
 
     @Value("${blog.posts.path}")
     private String postsPath;
@@ -32,8 +33,10 @@ public class BlogProperties implements IBlogProperties {
     private String gaDomainId;
 
     @Autowired
-    public BlogProperties(BlogAuthorProperties blogAuthorProperties) {
+    public BlogProperties(BlogAuthorProperties blogAuthorProperties,
+                          IDevProperties devProperties) {
         this.blogAuthorProperties = blogAuthorProperties;
+        this.devProperties = devProperties;
     }
 
     @PostConstruct
@@ -70,6 +73,11 @@ public class BlogProperties implements IBlogProperties {
     @Override
     public String getGaDomainName() {
         return Strings.emptyToNull(gaDomainId);
+    }
+
+    @Override
+    public IDevProperties getDevProperties() {
+        return devProperties;
     }
 
 }

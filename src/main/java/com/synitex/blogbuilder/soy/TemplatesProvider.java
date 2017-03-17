@@ -14,27 +14,23 @@ import org.springframework.stereotype.Service;
 public class TemplatesProvider implements ITemplatesProvider {
 
     private static final Logger log = LoggerFactory.getLogger(TemplatesProvider.class);
-
-    private final ITofuProvider tofuProvider;
+    
     private final IBlogProperties props;
     private final IDto2SoyMapper soyMapper;
 
     @Autowired
-    public TemplatesProvider(ITofuProvider tofuProvider,
-                             IBlogProperties props,
+    public TemplatesProvider(IBlogProperties props,
                              IDto2SoyMapper soyMapper) {
-        this.tofuProvider = tofuProvider;
         this.props = props;
         this.soyMapper = soyMapper;
     }
 
     @Override
-    public String build(TemplateId id, SoyMapData data) {
+    public String build(TemplateId id, SoyMapData data, SoyTofu tofu) {
         if(log.isDebugEnabled()) {
             log.debug("Building template {}", id.getTemplateId());
         }
-
-        SoyTofu tofu = tofuProvider.getTofu();
+        
         Renderer renderer = tofu.newRenderer(id.getTemplateId());
 
         SoyMapData dataWrapper = new SoyMapData();
@@ -52,8 +48,8 @@ public class TemplatesProvider implements ITemplatesProvider {
     }
 
     @Override
-    public String build(TemplateId id) {
-        return build(id, null);
+    public String build(TemplateId id, SoyTofu tofu) {
+        return build(id, null, tofu);
     }
 
     private SoyMapData createCtx() {

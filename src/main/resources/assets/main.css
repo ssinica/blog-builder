@@ -29,7 +29,12 @@ pre code {
     max-width: 100%;
     height: auto;
     line-height: 1;
-    }
+    border: 1px solid #cccccc;
+}
+
+a {
+    cursor: pointer;
+}
 
 /* -------------- My own styles -------------- */
 
@@ -37,7 +42,7 @@ body {
     background-color: #f9f9f9;
     color: #666;
     overflow-y: scroll;
-    font-size: 20px;
+    font-size: 14px;
     line-height: 1.5;
     font-weight: 400;
     font-family: 'Open Sans', sans-serif;
@@ -48,55 +53,42 @@ body {
 }
 .paragraph,
 .imageblock {
-    margin: 20px 0;
+    margin: 10px 0;
+}
+.paragraph {
+    text-align: justify;
+}
+.imageblock {
+    text-align: center;
 }
 .imageblock .title {
-    text-align: center;
-    font-size: 14px;
+    font-size: 12px;
 }
 
-.syn-about-panel {
-    position: relative;
-    width: 100%;
-    top: 0;
-    bottom: 0;
-    left: 0;
+.syn-header {
     background-color: #222;
     color: #999;
-    padding: 30px;
-}
-.syn-main-panel {
-    width: 100%;
-    float: none;
-    padding: 30px;
-}
-
-@media (min-width: 768px) {
-    .syn-about-panel {
-        position: fixed;
-        width: 30%;
-    }
-    .syn-main-panel {
-        float: right;
-        width: 70%;
-        overflow: hidden;
-    }
+    margin-bottom: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .syn-about-panel h3 {
     color: #999;
 }
 .syn-author-img-w {
-    width: 100%;
     text-align: center;
-    padding-bottom: 30px;
+    display: inline-block;
+    margin-right: 20px;
+    vertical-align: top;
 }
 .syn-author-img img {
-    max-width: 180px;
-    -webkit-border-radius: 100px;
-    -moz-border-radius: 100px;
-    border-radius: 100px;
+    max-width: 70px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+    border-radius: 50px;
     border: 3px solid #999;
+    vertical-align: baseline;
 }
 .syn-author-img img:hover {
     border: 3px solid #ccc;
@@ -106,81 +98,70 @@ body {
     color: #999;
 }
 
-.syn-author-info {
-    text-align: center;
-    padding-bottom: 30px;
-}
-
-.syn-social {
-    width: 100%;
-    text-align: center;
-    padding-bottom: 30px;
-}
-.syn-social a {
+.syn-social-a {
     color: #999;
-    font-size: 50px;
-    padding-right: 15px;
+    font-size: 25px;
+    padding-right: 4px;
+    padding-left: 4px;
 }
-.syn-social a:hover {
+.syn-social-a:hover {
     color: #ccc;
 }
 
 .syn-about-me {
-    text-align: center;
+    display: inline-block;
+    margin-top: 20px;
+}
+.syn-about-me h3 {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .syn-blog-item {
-    padding: 10px 30px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
     margin-bottom: 20px;
     position: relative;
 }
 .syn-blog-item-date {
     white-space: nowrap;
     font-size: 40%;
+    margin-left: 10px;
 }
-
-.syn-blog-item-delim {
-    width: 100%;
-    text-align: center;
+.syn-blog-short-item {
+    margin-bottom: 2px;
 }
-.syn-blog-item-delim span {
-    padding: 10px 0 20px 0;
+.syn-blog-short-item .syn-blog-item-date {
+    font-size: 9px;
+}
+.syn-blog-short-item a {
+    cursor: pointer;
+}
+.syn-share-btns {
     display: inline-block;
 }
-
-.syn-share-btns {
-}
-
 .syn-blog-item-details {
     padding: 20px 0;
     font-size: 16px;
     line-height: 22px;
 }
-
 .syn-post-header-w {
-    padding: 0 0 30px 0;
+    padding: 0 0 10px 0;
 }
-
-
 .syn-label-default {
     background-color: #999;
-    }
+}
 .syn-blog-item-tags {
     font-size: 14px;
-    }
+    display: inline-block;
+    float: right;
+}
 .syn-main-panel .syn-blog-item-tags {
-    margin-bottom: 20px;
-    }
+    float: left;
+}
 .syn-blog-item-tags .label {
     margin-right: 10px;
     font-size: 11px;
     font-weight: normal;
-    }
+}
 
 .syn-tags-container {
     margin: 20px 0;

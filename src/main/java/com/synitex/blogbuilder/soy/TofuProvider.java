@@ -1,9 +1,11 @@
 package com.synitex.blogbuilder.soy;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Strings;
 import com.google.template.soy.SoyFileSet;
 import com.google.template.soy.tofu.SoyTofu;
 import com.synitex.blogbuilder.props.IBlogProperties;
+import com.synitex.blogbuilder.props.IDevProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +34,13 @@ public class TofuProvider implements ITofuProvider {
     @Autowired
     public TofuProvider(IBlogProperties props) {
         this.props = props;
-        reloadTofu();
     }
 
     @Override
     public SoyTofu getTofu() {
-        //reloadTofu();
+        if(tofu == null || props.getDevProperties().isDevMode()) {
+            reloadTofu();
+        }
         return tofu;
     }
 
@@ -45,7 +48,11 @@ public class TofuProvider implements ITofuProvider {
         log.info("Reloading tofu...");
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
-            List<SoyFile> soyFiles = listSoyFilesFromClasspath();
+            IDevProperties devProps = props.getDevProperties();
+            String templatesPath = devProps.getTemplatesPath();
+            List<SoyFile> soyFiles = devProps.isDevMode() && !Strings.isNullOrEmpty(templatesPath)
+                    ? listSoyFilesFromDirectory(templatesPath)
+                    : listSoyFilesFromClasspath();
             SoyFileSet sfs = collectAllSoyTemplates(soyFiles);
             tofu = sfs.compileToTofu();
             log.info("Tofu reloaded in " + stopwatch.elapsed(MILLISECONDS) + "ms");
@@ -59,7 +66,9 @@ public class TofuProvider implements ITofuProvider {
         SoyFileSet.Builder soyBuilder = new SoyFileSet.Builder();
         for (SoyFile soyFile : soyFiles) {
             soyBuilder.add(soyFile.url);
-            log.info("Soy file found and added to tofu: " + soyFile.url.toString());
+            if(log.isDebugEnabled()) {
+                log.debug("Soy file found and added to tofu: " + soyFile.url.toString());
+            }
         }
         return soyBuilder.build();
     }
@@ -67,7 +76,9 @@ public class TofuProvider implements ITofuProvider {
     private List<SoyFile> listSoyFilesFromClasspath() throws IOException {
         List<SoyFile> soyFiles = new ArrayList<SoyFile>();
         String pattern = "classpath:templates/**.soy";
-        log.info("Searching soy files in classpath using pattern: " + pattern);
+        if(log.isDebugEnabled()) {
+            log.debug("Searching soy files in classpath using pattern: {}...", pattern);
+        }
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = resolver.getResources(pattern);
         if (resources != null && resources.length > 0) {
@@ -79,7 +90,9 @@ public class TofuProvider implements ITofuProvider {
     }
 
     private List<SoyFile> listSoyFilesFromDirectory(String soyPath) throws IOException {
-        log.info("Searching soy files in directory: " + soyPath);
+        if(log.isDebugEnabled()) {
+            log.debug("Searching soy files in directory: {}...", soyPath);
+        }
         File path = new File(soyPath);
         List<SoyFile> soyFiles = new ArrayList<SoyFile>();
         listSoyFilesFromDirectoryImpl(path, soyFiles);
