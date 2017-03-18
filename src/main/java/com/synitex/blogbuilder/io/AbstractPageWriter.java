@@ -3,7 +3,6 @@ package com.synitex.blogbuilder.io;
 import com.google.template.soy.data.SoyMapData;
 import com.google.template.soy.tofu.SoyTofu;
 import com.synitex.blogbuilder.dto.PostDto;
-import com.synitex.blogbuilder.dto.TagDto;
 import com.synitex.blogbuilder.props.IBlogProperties;
 import com.synitex.blogbuilder.soy.IDto2SoyMapper;
 import com.synitex.blogbuilder.soy.ITemplatesProvider;
@@ -31,13 +30,11 @@ public abstract class AbstractPageWriter {
 
     protected void write(
             List<PostDto> posts,
-            List<TagDto> tags,
             TemplateId templateId,
             Path path,
             SoyMapData data,
             SoyTofu tofu) {
         data.putSingle("posts", soyMapper.mapList(posts));
-        data.putSingle("tags", soyMapper.mapList(tags));
         String html = templatesProvider.build(templateId, data, tofu);
         writeFile(path, html);
     }

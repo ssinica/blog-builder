@@ -1,6 +1,5 @@
 package com.synitex.blogbuilder.asciidoc;
 
-import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ComparisonChain;
@@ -131,12 +130,8 @@ public class AsciidocService implements IAsciidocService, DirWatchListener {
                             .trimResults()
                             .split(tagsSource)
             );
-            List<TagDto> tags = Lists.newArrayList(Lists.transform(tagSources, new Function<String, TagDto>() {
-                @Override
-                public TagDto apply(String input) {
-                    return new TagDto(input, -1);
-                }
-            }));
+            List<TagDto> tags = Lists.newArrayList(
+                    Lists.transform(tagSources, input -> new TagDto(input, -1)));
             dto.setTags(tags);
         }
 
