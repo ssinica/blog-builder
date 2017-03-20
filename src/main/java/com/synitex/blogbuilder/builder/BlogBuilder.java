@@ -54,33 +54,33 @@ public class BlogBuilder implements IBlogBuilder {
     }
 
     @Override
-    public void build() {
+    public void build(boolean adminMode) {
         SoyTofu tofu = tofuProvider.getTofu();
         List<PostDto> posts = ascService.listPosts();
         
         log.info("Writing posts...");
-        postWriter.write(posts, tofu);
+        postWriter.write(posts, tofu, adminMode);
         
         log.info("Writing index.html...");
-        indexWriter.write(posts, tofu);
+        indexWriter.write(posts, tofu, adminMode);
 
         log.info("Writing assets...");
         assetsWriter.writeAssets();
     }
 
     @Override
-    public void build(final String postName) {
+    public void build(final String postName, boolean adminMode) {
         List<PostDto> posts = ascService.listPosts();
         SoyTofu tofu = tofuProvider.getTofu();
         
         PostDto post = ascService.getPost(postName);
         if(post != null) {
             log.info("Writing post {} to HTML...", post.getPermlink());
-            postWriter.write(post, tofu);
+            postWriter.write(post, tofu, adminMode);
         }
         
         log.info("Writing index.html...");
-        indexWriter.write(posts, tofu);
+        indexWriter.write(posts, tofu, adminMode);
 
         log.info("Writing assets...");
         assetsWriter.writeAssets();

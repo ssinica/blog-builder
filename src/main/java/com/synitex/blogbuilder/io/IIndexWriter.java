@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface IIndexWriter {
 
-    void write(List<PostDto> posts, SoyTofu tofu);
+    void write(List<PostDto> posts, SoyTofu tofu, boolean adminMode);
 
 }

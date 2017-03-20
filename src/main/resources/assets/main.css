@@ -35,6 +35,10 @@ pre code {
 a {
     cursor: pointer;
 }
+.navbar {
+    border-radius: 0;
+    margin-bottom: 0;
+}
 
 /* -------------- My own styles -------------- */
 

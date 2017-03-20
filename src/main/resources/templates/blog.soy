@@ -8,6 +8,7 @@
 */
 {template .indexHtml}
     {call common.header data="all" /}
+    {call .adminBar data="all" /}
 	<div class="fluid-container">
 		{call .topbar data="all" /}
 		<div class="row">
@@ -29,30 +30,30 @@
 */
 {template .post}
     {call common.header data="all" /}
-    	<div class="fluid-container">
-        	{call blog.topbar data="all" /}
-			<div class="row syn-main-panel">
-				<div class="col-md-offset-1 col-md-10 syn-blog-item">
+	<div class="fluid-container">
+		{call blog.topbar data="all" /}
+		<div class="row syn-main-panel">
+			<div class="col-md-offset-1 col-md-10 syn-blog-item">
 
-					<div class="syn-post-header-w">
-						<h1 class="syn-post-header"><a href="/{$data.post.permlink}.html">{$data.post.title}</a> <small class="syn-blog-item-date">{$data.post.date}</small></h1>
-					</div>
-
-					{call .tags}
-						{param tags: $data.post.tags /}
-					{/call}
-
-					{call blog.shareBtns data="all"}
-						{param post: $data.post /}
-					{/call}
-
-					<div class="syn-post">
-						{$data.post.content |noAutoescape}
-					</div>
-
+				<div class="syn-post-header-w">
+					<h1 class="syn-post-header"><a href="/{$data.post.permlink}.html">{$data.post.title}</a> <small class="syn-blog-item-date">{$data.post.date}</small></h1>
 				</div>
+
+				{call .tags}
+					{param tags: $data.post.tags /}
+				{/call}
+
+				{call blog.shareBtns data="all"}
+					{param post: $data.post /}
+				{/call}
+
+				<div class="syn-post">
+					{$data.post.content |noAutoescape}
+				</div>
+
 			</div>
 		</div>
+	</div>
     {call common.footer data="all" /}
 {/template}
 
@@ -162,4 +163,25 @@
             {/foreach}
         </div>
     {/if}
+{/template}
+
+/**
+* Admin bar
+* @param data
+*/
+{template .adminBar}
+	{if $data.adminMode}
+	<nav class="navbar navbar-default navbar-inverse">
+  		<div class="fluid-container">
+        	<div class="collapse navbar-collapse">
+        		<ul class="nav navbar-nav">
+        			<li><a id="statusLink" href="#">Status</a></li>
+        			<li><a id="rebuildLink" href="#">Rebuild</a></li>
+        			<li><a id="commitLink" href="#">Commit</a></li>
+        			<li><a id="pushLink" href="#">Push</a></li>
+				</ul>
+			</div>
+  		</div>
+  	</nav>
+  	{/if}
 {/template}

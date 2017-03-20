@@ -25,23 +25,24 @@ public class PostWriter extends AbstractPageWriter implements IPostWriter {
     }
 
     @Override
-    public void write(PostDto post, SoyTofu tofu) {
-        writeImpl(post, tofu);
+    public void write(PostDto post, SoyTofu tofu, boolean adminMode) {
+        writeImpl(post, tofu, adminMode);
     }
 
     @Override
-    public void write(List<PostDto> posts, SoyTofu tofu) {
+    public void write(List<PostDto> posts, SoyTofu tofu, boolean adminMode) {
         for(PostDto post : posts) {
-            writeImpl(post, tofu);
+            writeImpl(post, tofu, adminMode);
         }
     }
 
-    private void writeImpl(PostDto post, SoyTofu tofu) {
+    private void writeImpl(PostDto post, SoyTofu tofu, boolean adminMode) {
         String permalink = post.getPermlink();
         String outPath = props.getOutPath();
 
         SoyMapData data = new SoyMapData();
         data.putSingle("post", soyMapper.map(post));
+        data.put("adminMode", adminMode);
 
         String postHtml = templatesProvider.build(TemplateId.POST, data, tofu);
 

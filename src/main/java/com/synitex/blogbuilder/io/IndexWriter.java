@@ -25,8 +25,9 @@ public class IndexWriter extends AbstractPageWriter implements IIndexWriter {
     }
 
     @Override
-    public void write(List<PostDto> posts, SoyTofu tofu) {
+    public void write(List<PostDto> posts, SoyTofu tofu, boolean adminMode) {
         SoyMapData data = new SoyMapData();
+        data.put("adminMode", adminMode);
         Path path = Paths.get(props.getOutPath(),  "index.html");
         write(posts, TemplateId.INDEX_HTML, path, data, tofu);
     }

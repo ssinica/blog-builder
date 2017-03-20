@@ -1,4 +1,4 @@
-package com.synitex.blogbuilder.server;
+package com.synitex.blogbuilder;
 
 import com.google.common.base.Strings;
 import com.synitex.blogbuilder.builder.IBlogBuilder;
@@ -43,7 +43,7 @@ public class BlogFilter implements Filter {
         String reqUrl = req.getRequestURI();
         if(!Strings.isNullOrEmpty(reqUrl) && reqUrl.endsWith(".html")) {
             String postName = reqUrl.substring(1, reqUrl.length() - 5);
-            blogBuilder.build(postName);
+            blogBuilder.build(postName, true);
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

@@ -16,4 +16,6 @@ public interface IBlogProperties {
 
     IDevProperties getDevProperties();
 
+    IGithubProperties getGithubProperties();
+
 }

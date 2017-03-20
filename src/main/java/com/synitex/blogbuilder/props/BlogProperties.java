@@ -16,6 +16,7 @@ public class BlogProperties implements IBlogProperties {
 
     private final BlogAuthorProperties blogAuthorProperties;
     private final IDevProperties devProperties;
+    private final IGithubProperties githubProperties;
 
     @Value("${blog.posts.path}")
     private String postsPath;
@@ -34,13 +35,14 @@ public class BlogProperties implements IBlogProperties {
 
     @Autowired
     public BlogProperties(BlogAuthorProperties blogAuthorProperties,
-                          IDevProperties devProperties) {
+                          IDevProperties devProperties, IGithubProperties githubProperties) {
         this.blogAuthorProperties = blogAuthorProperties;
         this.devProperties = devProperties;
+        this.githubProperties = githubProperties;
     }
 
     @PostConstruct
-    public void postConstruct() {
+    public void init() {
         log.info("Posts path: " + postsPath);
         log.info("Out path: " + outPath);
     }
@@ -78,6 +80,11 @@ public class BlogProperties implements IBlogProperties {
     @Override
     public IDevProperties getDevProperties() {
         return devProperties;
+    }
+
+    @Override
+    public IGithubProperties getGithubProperties() {
+        return githubProperties;
     }
 
 }
